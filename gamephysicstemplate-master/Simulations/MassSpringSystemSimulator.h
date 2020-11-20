@@ -13,9 +13,12 @@
 
 class MassSpringSystemSimulator:public Simulator{
 public:
-	// Construtors
-	MassSpringSystemSimulator();
 	
+	MassSpringSystemSimulator() {
+		points = new vector<Point>();
+		springs = new vector<Spring>();
+	};
+
 	// UI Functions
 	const char * getTestCasesStr();
 	void initUI(DrawingUtilitiesClass * DUC);
@@ -38,6 +41,8 @@ public:
 	Vec3 getPositionOfMassPoint(int index);
 	Vec3 getVelocityOfMassPoint(int index);
 	void applyExternalForce(Vec3 force);
+	void eulerIntegrate(float timeStep);
+	void midpointIntegrate(float timeStep);
 	
 	// Do Not Change
 	void setIntegrator(int integrator) {
@@ -45,31 +50,6 @@ public:
 	}
 
 private:
-	class InitValues {
-	private:
-		const vector<Point> points;
-		const vector<Spring> springs;
-
-	public:
-		InitValues(const vector<Point> points_, const vector<Spring> springs_) : points(points_), springs(springs_){
-
-		}
-
-		vector<Point> getPoints() {
-			vector<Point> v = points;
-			return v;
-		}
-
-		vector<Spring> getSprings() {
-			vector<Spring> v = springs;
-			return v;
-		}
-	};
-
-	// Data Attributes
-	vector<Point> initPoints = vector<Point>{Point(Vec3(0, 0, 0), Vec3(-1, 0, 0), 10, 0, false), Point(Vec3(0, 2, 0), Vec3(1, 0, 0), 10, 0, false)};
-	InitValues init_case0 = InitValues(initPoints, vector<Spring>{Spring(initPoints[0], initPoints[1], 40, 1)}
-	);
 
 	float m_fMass;
 	float m_fStiffness;
@@ -79,8 +59,8 @@ private:
 	float initial_length;
 	bool gravity;
 
-	vector<Point> points;
-	vector<Spring> springs;
+	vector<Point>* points;
+	vector<Spring>* springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;
@@ -88,7 +68,5 @@ private:
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
 	float m_fSphereSize;
-
-	void changeConfig(InitValues values);
 };
 #endif
