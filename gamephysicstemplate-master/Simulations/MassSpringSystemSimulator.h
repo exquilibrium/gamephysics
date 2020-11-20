@@ -14,10 +14,7 @@
 class MassSpringSystemSimulator:public Simulator{
 public:
 	
-	MassSpringSystemSimulator() {
-		points = new vector<Point>();
-		springs = new vector<Spring>();
-	};
+	MassSpringSystemSimulator();
 
 	// UI Functions
 	const char * getTestCasesStr();
@@ -59,8 +56,8 @@ private:
 	float initial_length;
 	bool gravity;
 
-	vector<Point>* points;
-	vector<Spring>* springs;
+	vector<Point> points;
+	vector<Spring> springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;
