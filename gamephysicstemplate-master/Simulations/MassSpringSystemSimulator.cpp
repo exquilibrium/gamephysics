@@ -17,17 +17,8 @@ MassSpringSystemSimulator::MassSpringSystemSimulator(){
 }
 
 void MassSpringSystemSimulator::changeConfig(InitValues values) {
-	num_mp = values.get_num_mp();
-	positions = values.get_positions();
-	velocities = values.get_velocities();
-
-	num_springs = values.get_num_spring();
-	springs = values.get_springs();
-
-	spring_lengths = vector<float>(num_springs);
-	for (int i = 0; i < num_springs; i++) {
-		spring_lengths[i] = initial_length;
-	}
+	points = values.getPoints();
+	springs = values.getSprings();
 }
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
@@ -57,22 +48,37 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase) {
 }
 
 void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
-	if (num_mp < 1)
+	if (points.size() < 1)
 		return;
 	std::mt19937 eng;
 	std::uniform_real_distribution<float> randCol(0.0f, 1.0f);
 	std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
-	for (int i = 0; i < num_mp; i++)
+	for (int i = 0; i < points.size(); i++)
 	{
 		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
-		DUC->drawSphere(positions[i], Vec3(m_fSphereSize, m_fSphereSize, m_fSphereSize));
+		DUC->drawSphere(points[i].pos, Vec3(m_fSphereSize, m_fSphereSize, m_fSphereSize));
 	}
 }
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	//TODO
+	for (Point p : points) {
+		p.clearForce();
+		if (gravity) {
+			p.force += Vec3(0, 0, 9.81*p.mass);
+		}
+
+		//?
+	}
 }
 void MassSpringSystemSimulator::simulateTimestep(float timeStep) {
-	//TODO
+	externalForcesCalculations(timeStep);
+	for (Spring s : springs) {
+		float l = sqrt(s.p1.pos.squaredDistanceTo(s.p2.pos));
+		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1.pos - s.p2.pos) / l);
+		s.p1.force += force;
+		s.p2.force -= force;
+	}
+
+
 }
 void MassSpringSystemSimulator::onClick(int x, int y) {
 	m_trackmouse.x = x;
@@ -96,32 +102,32 @@ void MassSpringSystemSimulator::setDampingFactor(float damping) {
 	m_fDamping = damping;
 }
 int MassSpringSystemSimulator::addMassPoint(Vec3 position, Vec3 Velocity, bool isFixed) {
-	//TODO
-	return 0;
+	points.push_back(Point(position, Velocity,m_fMass, m_fDamping, isFixed));
+	return points.size() - 1;
 }
 
 void MassSpringSystemSimulator::addSpring(int masspoint1, int masspoint2, float initialLength) {
-	//TODO
+	springs.push_back(Spring(points[masspoint1], points[masspoint2], m_fStiffness, initialLength));
 }
 
 int MassSpringSystemSimulator::getNumberOfMassPoints() {
-	return num_mp;
+	return points.size();
 }
 
 int MassSpringSystemSimulator::getNumberOfSprings() {
-	return num_springs;
+	return springs.size();
 }
 
 Vec3 MassSpringSystemSimulator::getPositionOfMassPoint(int index) {
-	return positions[index];
+	return points[index].pos;
 }
 
 Vec3 MassSpringSystemSimulator::getVelocityOfMassPoint(int index) {
-	return velocities[index];
+	return points[index].vel;
 }
 
 void MassSpringSystemSimulator::applyExternalForce(Vec3 force) {
-	//TODO
+	
 }
 
 

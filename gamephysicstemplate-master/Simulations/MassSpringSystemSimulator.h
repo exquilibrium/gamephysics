@@ -1,6 +1,8 @@
 #ifndef MASSSPRINGSYSTEMSIMULATOR_h
 #define MASSSPRINGSYSTEMSIMULATOR_h
 #include "Simulator.h"
+#include "Point.h"
+#include "Spring.h"
 
 // Do Not Change
 #define EULER 0
@@ -45,47 +47,28 @@ public:
 private:
 	class InitValues {
 	private:
-		const int num_mp;
-		const vector<Vec3> positions;
-		const vector<Vec3> velocities;
-
-		const int num_spring;
-		const vector<pair<int, int>> springs;
+		const vector<Point> points;
+		const vector<Spring> springs;
 
 	public:
-		InitValues(const int num_mp, const vector<Vec3> positions, const vector<Vec3> velocities, const int num_spring, const vector<pair<int, int>> springs) : num_mp(num_mp), positions(positions), velocities(velocities), 
-			num_spring(num_spring), springs(springs) {
+		InitValues(const vector<Point> points_, const vector<Spring> springs_) : points(points_), springs(springs_){
 
 		}
 
-		int get_num_mp() {
-			return num_mp;
+		vector<Point> getPoints() {
+			vector<Point> v = points;
+			return v;
 		}
 
-		vector<Vec3> get_positions() {
-			vector<Vec3> result = positions;
-			return result;
-		}
-
-		vector<Vec3> get_velocities() {
-			vector<Vec3> result = velocities;
-			return result;
-		}
-
-		int get_num_spring() {
-			return num_spring;
-		}
-
-		vector<pair<int, int>> get_springs() {
-			vector<pair<int, int>> result = springs;
-			return result;
+		vector<Spring> getSprings() {
+			vector<Spring> v = springs;
+			return v;
 		}
 	};
 
 	// Data Attributes
-	InitValues init_case0 = InitValues(
-		2, vector<Vec3>{ Vec3(0, 0, 0), Vec3(0, 2, 0) }, vector<Vec3>{Vec3(0, 1, 0), Vec3(0, -1, 0)},
-		1, vector<pair<int, int>> {make_pair(0, 1)}
+	vector<Point> initPoints = vector<Point>{Point(Vec3(0, 0, 0), Vec3(-1, 0, 0), 10, 0, false), Point(Vec3(0, 2, 0), Vec3(1, 0, 0), 10, 0, false)};
+	InitValues init_case0 = InitValues(initPoints, vector<Spring>{Spring(initPoints[0], initPoints[1], 40, 1)}
 	);
 
 	float m_fMass;
@@ -93,15 +76,11 @@ private:
 	float m_fDamping;
 	int m_iIntegrator;
 
-	float gravity;
 	float initial_length;
+	bool gravity;
 
-	int num_mp;
-	vector<Vec3> positions;
-	vector<Vec3> velocities;
-	int num_springs;
-	vector<pair<int, int>> springs;
-	vector<float> spring_lengths;
+	vector<Point> points;
+	vector<Spring> springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;
