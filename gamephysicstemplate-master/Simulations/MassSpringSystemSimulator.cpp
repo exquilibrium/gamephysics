@@ -43,6 +43,7 @@ void MassSpringSystemSimulator::reset() {
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
 	//TODO: put UI for time step, method, etc
+	this->DUC = DUC;
 }
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase) {
@@ -63,8 +64,8 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
 	for (int i = 0; i < num_mp; i++)
 	{
-		//DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
-		//DUC->drawSphere(positions[i], Vec3(m_fSphereSize, m_fSphereSize, m_fSphereSize));
+		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
+		DUC->drawSphere(positions[i], Vec3(m_fSphereSize, m_fSphereSize, m_fSphereSize));
 	}
 }
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
