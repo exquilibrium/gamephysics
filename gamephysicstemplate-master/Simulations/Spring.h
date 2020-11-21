@@ -7,11 +7,11 @@ public:
 	float stiffnes, initLength;
 
 	Spring(Point* p1_, Point* p2_, float stiffnes_, float initLength_) {
-		p1 = p1_;
-		p2 = p2_;
+		this->p1 = p1_;
+		this->p2 = p2_;
 
-		stiffnes = stiffnes_;
-		initLength = initLength_;
+		this->stiffnes = stiffnes_;
+		this->initLength = initLength_;
 	}
 };
 
