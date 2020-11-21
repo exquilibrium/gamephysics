@@ -9,15 +9,15 @@ MassSpringSystemSimulator::MassSpringSystemSimulator(){
 	m_fMass = 10;
 	m_fStiffness = 40;
 
-	m_iIntegrator = EULER;
+	m_iIntegrator = MIDPOINT;
 
 	m_fSphereSize = 0.05f;
 
-	gravity = true;
+	gravity = false;
 
-	points.push_back(Point(Vec3(0,0,0), Vec3(-1,0,0), 10, 0, false));
+	/*points.push_back(Point(Vec3(0,0,0), Vec3(-1,0,0), 10, 0, false));
 	points.push_back(Point(Vec3(0, 2, 0), Vec3(1, 0, 0), 10, 0, false));
-	springs.push_back(Spring(&points[0], &points[1], 40, 1));
+	springs.push_back(Spring(&points[0], &points[1], 40, 1));*/
 }
 
 
@@ -60,22 +60,16 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	}
 }
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	for (auto &p : points) {
-		p.clearForce();
-		if (gravity) {
-			p.force += Vec3(0, -9.81*p.mass, 0);
-		}
-
-		//?
-	}
+	m_externalForce = Vec3(0, 0, 0);
 }
 void MassSpringSystemSimulator::simulateTimestep(float timeStep) {
+	applyExternalForce(m_externalForce);
 	for (auto &s : springs) {
 		float l = sqrt(s.p1->pos.squaredDistanceTo(s.p2->pos));
 		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1->pos - s.p2->pos) / l);
 		s.p1->force += force;
 		s.p2->force -= force;
-	}
+  	}
 
 	switch (m_iIntegrator) {
 		case EULER:
@@ -112,7 +106,7 @@ int MassSpringSystemSimulator::addMassPoint(Vec3 position, Vec3 Velocity, bool i
 }
 
 void MassSpringSystemSimulator::addSpring(int masspoint1, int masspoint2, float initialLength) {
-	springs.push_back(Spring(&points[masspoint2], &points[masspoint2], m_fStiffness, initialLength));
+	springs.push_back(Spring(&points[masspoint1], &points[masspoint2], m_fStiffness, initialLength));
 }
 
 int MassSpringSystemSimulator::getNumberOfMassPoints() {
@@ -132,7 +126,14 @@ Vec3 MassSpringSystemSimulator::getVelocityOfMassPoint(int index) {
 }
 
 void MassSpringSystemSimulator::applyExternalForce(Vec3 force) {
-	
+	for (auto& p : points) {
+		if (gravity) {
+			force += Vec3(0, -9.81 * p.mass, 0);
+		}
+
+		p.clearForce();
+		p.force += force;
+	}
 }
 
 void MassSpringSystemSimulator::eulerIntegrate(float timeStep) {
@@ -153,7 +154,7 @@ void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 		p.pos = p.pos + timeStep * v1;
 	}
 
-	externalForcesCalculations(timeStep);
+	applyExternalForce(m_externalForce);
 	for (auto  &s : springs) { 
 
 		float l = sqrt(s.p1->tempPos.squaredDistanceTo(s.p2->tempPos));
