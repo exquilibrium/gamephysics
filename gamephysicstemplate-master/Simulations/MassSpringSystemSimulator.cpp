@@ -25,35 +25,6 @@ void MassSpringSystemSimulator::addTwoSpringSetup() {
 	springs.push_back(Spring(&points[0], &points[1], 40, 1));
 }
 
-void MassSpringSystemSimulator::addSixSpringSetup() {
-	reset();
-	points.clear();
-	springs.clear();
-
-	addMassPoint(Vec3(0.5, 1.5, 0), Vec3(0, 0, 0), true);
-	addMassPoint(Vec3(0.5, 0.85, 0), Vec3(0, 0, 0), true);
-
-	addMassPoint(Vec3(0, 1.2, 0.5), Vec3(-0.5, 0.5, 0.5), false);
-	addMassPoint(Vec3(0, 1.2, -0.5), Vec3(-0.5, 0.5, -0.5), false);
-	addMassPoint(Vec3(1, 1.2, -0.5), Vec3(0.5, 0.5, -0.5), false);
-	addMassPoint(Vec3(1, 1.2, 0.5), Vec3(0.5, 0.5, 0.5), false);
-
-	addSpring(0, 2, 0.046);
-	addSpring(0, 3, 0.046);
-	addSpring(0, 4, 0.046);
-	addSpring(0, 5, 0.046);
-
-	addSpring(1, 2, 0.08);
-	addSpring(1, 3, 0.08);
-	addSpring(1, 4, 0.08);
-	addSpring(1, 5, 0.08);
-
-	addSpring(2, 3, 1.2);
-	addSpring(3, 4, 1.2);
-	addSpring(4, 5, 1.2);
-	addSpring(5, 2, 1.2);
-}
-
 void MassSpringSystemSimulator::addTenSpringSetup() {
 	reset();
 	points.clear();
@@ -103,7 +74,7 @@ void MassSpringSystemSimulator::addTenSpringSetup() {
 
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return " Euler 2-point mass-spring-setup, Euler 10-point mass-spring-setup, Midpoint 2-point mass-spring-setup, Midpoint 10-point mass-spring-setup, Euler6, Midpoint6";
+	return " Euler 2-point mass-spring-setup, Euler 10-point mass-spring-setup, Midpoint 2-point mass-spring-setup, Midpoint 10-point mass-spring-setup";
 }
 
 void MassSpringSystemSimulator::reset() {
@@ -135,15 +106,6 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase) {
 	case 3:
 		m_iIntegrator = MIDPOINT;
 		addTenSpringSetup();
-		break;
-
-	case 4:
-		m_iIntegrator = EULER;
-		addSixSpringSetup();
-		break;
-	case 5:
-		m_iIntegrator = MIDPOINT;
-		addSixSpringSetup();
 		break;
 	default:
 		break;
@@ -275,9 +237,9 @@ void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 		}
 		Vec3 a0 = p.force / p.mass;
 		p.tempPos = p.pos + (timeStep/2) * p.vel;
-		p.tempVel = p.vel + (timeStep/2) * a0;
+		Vec3 v0 = p.vel + (timeStep/2) * a0;
 
-		p.pos = p.pos + timeStep * p.tempVel;
+		p.pos = p.pos + timeStep * v0;
 
 		if (p.pos.y < -1) {
 			p.pos.y = -1;
@@ -287,15 +249,16 @@ void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 	// applyExternalForce(m_externalForce);
 
 	for (auto &s : springs) { 
-		float l = sqrt(s.p1->pos.squaredDistanceTo(s.p2->pos));
-		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1->pos - s.p2->pos) / l);
+		float l = sqrt(s.p1->tempPos.squaredDistanceTo(s.p2->tempPos));
+		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1->tempPos - s.p2->tempPos) / l);
 		s.p1->force += force;
 		s.p2->force -= force;
 	}
 
 	int i = 0;
 	for (auto &p : points) {
-		p.vel = p.vel + timeStep * (p.force / p.mass);
+		Vec3 a1 = p.force / p.mass;
+		p.vel = p.vel + timeStep * a1;
 
 		cout << "MIDPOINT Point " + to_string(i);
 		cout << ": Position = " + p.pos.toString() + ", Velocity = " + p.vel.toString() + "\n";

@@ -43,8 +43,6 @@ public:
 
 	void addTwoSpringSetup();
 	void addTenSpringSetup();
-
-	void addSixSpringSetup();
 	
 	// Do Not Change
 	void setIntegrator(int integrator) {

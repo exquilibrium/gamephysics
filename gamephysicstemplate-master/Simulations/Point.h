@@ -4,7 +4,7 @@
 class Point
 {
 public: 
-	Vec3 pos, vel, force, tempPos, tempVel, tempAcc;
+	Vec3 pos, vel, force, tempPos;
 	float mass, damping;
 	bool fixed;
 
@@ -17,7 +17,6 @@ public:
 		this->damping = damping;
 		this->fixed = fixed_;
 		this->tempPos = Vec3(0, 0, 0);
-		this->tempVel = Vec3(0, 0, 0);
 		this->force = Vec3(0, 0, 0);
 	}
 
