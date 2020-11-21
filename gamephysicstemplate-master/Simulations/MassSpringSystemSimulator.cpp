@@ -249,8 +249,8 @@ void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 	applyExternalForce(m_externalForce);
 	for (auto  &s : springs) { 
 
-		float l = sqrt(s.p1->tempPos.squaredDistanceTo(s.p2->tempPos));
-		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1->tempPos - s.p2->tempPos) / l);
+		float l = sqrt(s.p1->pos.squaredDistanceTo(s.p2->pos));
+		Vec3 force = -s.stiffnes * (l - s.initLength) * ((s.p1->pos - s.p2->pos) / l);
 		s.p1->force += force;
 		s.p2->force -= force;
 	}
