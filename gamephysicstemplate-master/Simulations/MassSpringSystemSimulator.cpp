@@ -30,15 +30,46 @@ void MassSpringSystemSimulator::addTenSpringSetup() {
 	points.clear();
 	springs.clear();
 
-	for (int i = 0; i < 5; i++) {
-		addMassPoint(Vec3(i, i - 1, i) / 10.0f, Vec3(i % 2, 1, 0), false);
-		addMassPoint(Vec3(i + 1, i, i - 1) / 10.0f, Vec3(0, (i % 3) - 1, 0), false);
+	addMassPoint(Vec3(0.5,1.5,0), Vec3(0,0,0), true);
+	addMassPoint(Vec3(0.5, 0.85, 0), Vec3(0, 0, 0), true);
 
-	}
+	addMassPoint(Vec3(0, 1.2, 0.5), Vec3(-0.5, 0.5, 0.5), false);
+	addMassPoint(Vec3(0, 1.2, -0.5), Vec3(-0.5, 0.5, -0.5), false);
+	addMassPoint(Vec3(1, 1.2, -0.5), Vec3(0.5, 0.5, -0.5), false);
+	addMassPoint(Vec3(1, 1.2, 0.5), Vec3(0.5, 0.5, 0.5), false);
 
-	for (int i = 0; i < 10; i++) {
-		addSpring(i, (i + 4) % 10, (i % 3) + 1);
-	}
+	addMassPoint(Vec3(0, 0.5, 0.5), Vec3(-0.5, -0.5, 0.5), false);
+	addMassPoint(Vec3(0, 0.5, -0.5), Vec3(-0.5, -0.5, -0.5), false);
+	addMassPoint(Vec3(1, 0.5, -0.5), Vec3(0.5, -0.5, -0.5), false);
+	addMassPoint(Vec3(1, 0.5, 0.5), Vec3(0.5, -0.5, 0.5), false);
+
+	addSpring(0, 2, 0.046);
+	addSpring(0, 3, 0.046);
+	addSpring(0, 4, 0.046);
+	addSpring(0, 5, 0.046);
+
+	addSpring(1, 2, 0.08);
+	addSpring(1, 3, 0.08);
+	addSpring(1, 4, 0.08);
+	addSpring(1, 5, 0.08);
+	addSpring(1, 6, 0.08);
+	addSpring(1, 7, 0.08);
+	addSpring(1, 8, 0.08);
+	addSpring(1, 9, 0.08);
+
+	addSpring(2, 3, 1.2);
+	addSpring(3, 4, 1.2);
+	addSpring(4, 5, 1.2);
+	addSpring(5, 2, 1.2);
+	addSpring(6, 7, 1.2);
+	addSpring(7, 8, 1.2);
+	addSpring(8, 9, 1.2);
+	addSpring(6, 9, 1.2);
+
+	addSpring(2, 6, 1.2);
+	addSpring(3, 7, 1.2);
+	addSpring(4, 8, 1.2);
+	addSpring(5, 9, 1.2);
 }
 
 
@@ -182,6 +213,9 @@ void MassSpringSystemSimulator::applyExternalForce(Vec3 force) {
 void MassSpringSystemSimulator::eulerIntegrate(float timeStep) {
 	int i = 0;
 	for (auto &p : points) {
+		if (p.fixed) {
+			continue;
+		}
 		Vec3 a = p.force / p.mass;
 		Vec3 v = p.vel + timeStep * a;
 		p.pos = p.pos + timeStep * p.vel;
@@ -198,6 +232,9 @@ void MassSpringSystemSimulator::eulerIntegrate(float timeStep) {
 
 void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 	for (auto &p : points) {
+		if (p.fixed) {
+			continue;
+		}
 		Vec3 a0 = p.force / p.mass;
 		p.tempPos = p.pos + timeStep/2 * p.vel;
 		Vec3 v1 = p.vel + timeStep/2 * a0;
