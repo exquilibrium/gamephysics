@@ -40,6 +40,9 @@ public:
 	void applyExternalForce(Vec3 force);
 	void eulerIntegrate(float timeStep);
 	void midpointIntegrate(float timeStep);
+
+	void addTwoSpringSetup();
+	void addTenSpringSetup();
 	
 	// Do Not Change
 	void setIntegrator(int integrator) {

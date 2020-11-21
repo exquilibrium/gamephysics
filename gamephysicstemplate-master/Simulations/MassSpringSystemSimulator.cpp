@@ -14,34 +14,68 @@ MassSpringSystemSimulator::MassSpringSystemSimulator(){
 	m_fSphereSize = 0.05f;
 
 	gravity = false;
+}
 
-	/*points.push_back(Point(Vec3(0,0,0), Vec3(-1,0,0), 10, 0, false));
+void MassSpringSystemSimulator::addTwoSpringSetup() {
+	reset();
+	points.clear();
+	springs.clear();
+	points.push_back(Point(Vec3(0, 0, 0), Vec3(-1, 0, 0), 10, 0, false));
 	points.push_back(Point(Vec3(0, 2, 0), Vec3(1, 0, 0), 10, 0, false));
-	springs.push_back(Spring(&points[0], &points[1], 40, 1));*/
+	springs.push_back(Spring(&points[0], &points[1], 40, 1));
+}
+
+void MassSpringSystemSimulator::addTenSpringSetup() {
+	reset();
+	points.clear();
+	springs.clear();
+
+	for (int i = 0; i < 5; i++) {
+		addMassPoint(Vec3(i, i - 1, i) / 10.0f, Vec3(i % 2, 1, 0), false);
+		addMassPoint(Vec3(i + 1, i, i - 1) / 10.0f, Vec3(0, (i % 3) - 1, 0), false);
+
+	}
+
+	for (int i = 0; i < 10; i++) {
+		addSpring(i, (i + 4) % 10, (i % 3) + 1);
+	}
 }
 
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "2-point mass-spring-setup, 10-point mass-spring-setup";
+	return " Euler 2-point mass-spring-setup, Euler 10-point mass-spring-setup, Midpoint 2-point mass-spring-setup, Midpoint 10-point mass-spring-setup";
 }
 
 void MassSpringSystemSimulator::reset() {
-	//TODO probably has to do more
 	m_mouse.x = m_mouse.y = 0;
 	m_trackmouse.x = m_trackmouse.y = 0;
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
-	//TODO: put UI for time step, method, etc
 	this->DUC = DUC;
+	TwAddVarRW(DUC->g_pTweakBar, "Use gravity", TW_TYPE_BOOLCPP, &gravity, "");
 }
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase) {
-	//TODO: Add other cases
 	switch (testCase)
 	{
 	case 0:
+		m_iIntegrator = EULER;
+		addTwoSpringSetup();
+		break;
+	case 1:
+		m_iIntegrator = EULER;
+		addTenSpringSetup();
+		break;
+	case 2:
+		m_iIntegrator = MIDPOINT;
+		addTwoSpringSetup();
+		break;
+	case 3:
+		m_iIntegrator = MIDPOINT;
+		addTenSpringSetup();
+		break;
 	default:
 		break;
 	}
@@ -58,6 +92,15 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
 		DUC->drawSphere(points[i].pos, Vec3(m_fSphereSize, m_fSphereSize, m_fSphereSize));
 	}
+
+	if (springs.size() < 1)
+		return;
+
+	DUC->beginLine();
+	for (Spring s : springs) {
+		DUC->drawLine(s.p1->pos, Vec3(1,1,1), s.p2->pos, Vec3(1,1,1));
+	}
+	DUC->endLine();
 }
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 	m_externalForce = Vec3(0, 0, 0);
@@ -137,21 +180,33 @@ void MassSpringSystemSimulator::applyExternalForce(Vec3 force) {
 }
 
 void MassSpringSystemSimulator::eulerIntegrate(float timeStep) {
+	int i = 0;
 	for (auto &p : points) {
 		Vec3 a = p.force / p.mass;
 		Vec3 v = p.vel + timeStep * a;
 		p.pos = p.pos + timeStep * p.vel;
+		if (p.pos.y < -1) {
+			p.pos.y = -1;
+		}
 		p.vel = v;
+
+		cout << "EULER Point " + to_string(i);
+		cout << ": Position = " + p.pos.toString() + ", Velocity = " + p.vel.toString() + "\n";
+		i++;
 	}
 }
 
-void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {	
+void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 	for (auto &p : points) {
 		Vec3 a0 = p.force / p.mass;
 		p.tempPos = p.pos + timeStep/2 * p.vel;
 		Vec3 v1 = p.vel + timeStep/2 * a0;
 
 		p.pos = p.pos + timeStep * v1;
+
+		if (p.pos.y < -1) {
+			p.pos.y = -1;
+		}
 	}
 
 	applyExternalForce(m_externalForce);
@@ -163,9 +218,14 @@ void MassSpringSystemSimulator::midpointIntegrate(float timeStep) {
 		s.p2->force -= force;
 	}
 
+	int i = 0;
 	for (auto &p : points) {
 		Vec3 a1 = p.force / p.mass;
 		p.vel = p.vel + timeStep * a1;
+
+		cout << "MIDPOINT Point " + to_string(i);
+		cout << ": Position = " + p.pos.toString() + ", Velocity = " + p.vel.toString() + "\n";
+		i++;
 	}
 }
 
