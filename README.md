@@ -1,2 +1,0 @@
-# gamephysics
-Game Physics Exercise
