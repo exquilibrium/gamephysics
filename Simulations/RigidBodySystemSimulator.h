@@ -1,6 +1,10 @@
 #ifndef RIGIDBODYSYSTEMSIMULATOR_h
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
+#include "util\matrixbase.h"
+#include <vector>
+using namespace std;
+
 //add your header for your rigid body system, for e.g.,
 //#include "rigidBodySystem.h" 
 
@@ -34,8 +38,15 @@ public:
 
 private:
 	// Attributes
-	// add your RigidBodySystem data members, for e.g.,
-	// RigidBodySystem * m_pRigidBodySystem; 
+	struct Rigidbody {
+		Mat4 transform;
+		Mat4 I;
+		Vec3 w, L, vcm;
+		Quat r;
+		float mass;
+		vector<pair<Vec3, Vec3>> F;
+	};
+	vector<Rigidbody> bodies;
 	Vec3 m_externalForce;
 
 	// UI Attributes
