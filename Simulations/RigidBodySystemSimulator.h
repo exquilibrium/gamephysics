@@ -2,8 +2,10 @@
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
 #include "util\matrixbase.h"
+#include "util\vectorbase.h"
 #include <vector>
 using namespace std;
+using namespace GamePhysics;
 
 //add your header for your rigid body system, for e.g.,
 //#include "rigidBodySystem.h" 
@@ -36,6 +38,7 @@ public:
 	void setOrientationOf(int i,Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
 
+	boolean grav = false;
 private:
 	// Attributes
 	struct Rigidbody {
