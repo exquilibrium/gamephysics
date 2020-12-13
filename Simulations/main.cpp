@@ -254,7 +254,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 	}
 	if(!g_bSimulateByStep){
 #ifdef ADAPTIVESTEP
-		g_pSimulator->externalForcesCalculations(fElapsedTime);
+		//g_pSimulator->externalForcesCalculations(fElapsedTime);
 		static float timeAcc = 0;
 		timeAcc += fElapsedTime * g_fTimeFactor;
 		int maxIter = 10;
@@ -268,7 +268,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 			timeAcc -= g_fTimestep;
 		}
 #else
-		g_pSimulator->externalForcesCalculations(g_fTimestep);
+		//g_pSimulator->externalForcesCalculations(g_fTimestep);
 		g_pSimulator->simulateTimestep(g_fTimestep);
 #endif
 	}else{
