@@ -158,7 +158,7 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 			auto v2_world = b2.vcm + cross(b2.w, cp2_local);
 			auto v_rel =  v2_world - v1_world;
 
-			if (dot(v_rel, n) > 0.5) {
+			if (dot(v_rel, n) < 0.0) {
 				continue;
 			}
 			auto J_nom = -(1 + c) * v_rel * n;
