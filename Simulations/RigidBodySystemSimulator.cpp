@@ -44,13 +44,13 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
 	reset();
+	Mat4 m;
 	switch (m_iTestCase)
 	{
 	case 0:
 		cout << "simple_single_body_simulation!\n";
 		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 10);
-		applyForceOnBody(0, Vec3(0.25, 0.25, 0), Vec3(0, -10000, 0));
-		setOrientationOf(0,Quat(1,0,0));
+		applyForceOnBody(0, Vec3(0.25, 0.25, 0), Vec3(100, -100, 0));
 		/*addRigidBody(Vec3(-0.1f, -0.2f, 0.1f), Vec3(0.4f, 0.2f, 0.2f), 100.0f);
 		applyForceOnBody(0, Vec3(0.0, 0.0f, 0.0), Vec3(0, 0, 200));*/
 		grav = false;
@@ -101,7 +101,7 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 		}
 		r.F.clear();
 
-		r.r += ((timeStep / 2) * Quat(0, r.w.x, r.w.y, r.w.z)*(r.r));
+		r.r += ((timeStep / 2) * Quat(r.w.x, r.w.y, r.w.z,0)*(r.r));
 
 		r.L += timeStep * q;
 
@@ -163,14 +163,16 @@ void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
 	b.transform.value[2][2] = size.z;
 	b.mass = mass;
 
-
 	b.I.value[0][0] = (1/12.0f) * b.mass *(size.y*size.y + size.z * size.z);
 	b.I.value[1][1] = (1 / 12.0f) * b.mass * (size.x * size.x + size.z * size.z);
 	b.I.value[2][2] = (1 / 12.0f) * b.mass * (size.x * size.x + size.y * size.y);
 	b.I.value[3][3] = 1;
 
-	b.I.inverse();
+	b.I = b.I.inverse();
 
+	Mat4 id = Mat4();
+	id.initId();
+	b.r = Quat(id);
 	bodies.push_back(b);
 }
 
