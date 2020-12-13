@@ -328,6 +328,10 @@ namespace collisionTools{
 				}
 			}
 		}
+
+		if (fromWhere == -1)
+			return { false, Vec3(0.0), Vec3(0.0), 0.0 };
+
 		// if we get here then we know that every axis had overlap on it
 		// so we can guarantee an intersection
 		XMVECTOR normal;

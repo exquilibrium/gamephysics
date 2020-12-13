@@ -3,7 +3,10 @@
 #include "Simulator.h"
 #include "util\matrixbase.h"
 #include "util\vectorbase.h"
+#include "collisionDetect.h"
 #include <vector>
+#include <unordered_map>
+#include <set>
 using namespace std;
 using namespace GamePhysics;
 
@@ -42,7 +45,7 @@ public:
 private:
 	// Attributes
 	struct Rigidbody {
-		Mat4 transform;
+		Mat4 transMat, scMat;
 		Mat4 I;
 		Vec3 w, L, vcm;
 		Quat r;
@@ -50,7 +53,9 @@ private:
 		vector<pair<Vec3, Vec3>> F;
 	};
 	vector<Rigidbody> bodies;
+	set<pair<int, int>> collisions;
 	Vec3 m_externalForce;
+	float c = 1;
 
 	// UI Attributes
 	Point2D m_mouse;
