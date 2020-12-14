@@ -60,19 +60,33 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		break;
 	case 1:
 		cout << "Two-rigid-body_collision scene!\n";
-		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 10);
-		applyForceOnBody(0, Vec3(0.0, 0.0, 0), Vec3(0, -100, 0));
-		addRigidBody(Vec3(0.0f, -0.2f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), 10.0f);
-		applyForceOnBody(1, Vec3(0.0, 0.0f, 0.0), Vec3(0, 100, 0));
+		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 5);
+		applyForceOnBody(0, Vec3(0.0, 0.0, 0), Vec3(0, -1000, 0));
+		addRigidBody(Vec3(0.0f, -0.2f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), 5);
+		applyForceOnBody(1, Vec3(0.0, 0.0f, 0.0), Vec3(0, 1000, 0));
 		grav = false;
 		break;
 	case 2:
 		cout << "Complex_simulation!\n";
-		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 10);
-		applyForceOnBody(0, Vec3(0.25, 0.25, 0), Vec3(-100, -100, 0));
-		addRigidBody(Vec3(0.0f, -0.2f, 0.0f), Vec3(0.4f, 0.2f, 0.2f), 10.0f);
-		addRigidBody(Vec3(0.0f, -0.2f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), 10.0f);
-		//applyForceOnBody(1, Vec3(0.0, 0.0f, 0.0), Vec3(100, 100, 0));
+		addRigidBody(Vec3(0, 0.0, 0), Vec3(0.25, 0.25, 0.25), 10);
+		applyForceOnBody(0, Vec3(0.25,0.25, 0), Vec3(0, -500, 0));
+		applyForceOnBody(0, Vec3(-0.25, -0.25, 0), Vec3(0, 500, 0));
+		applyForceOnBody(0, Vec3(0, 0.25, 0.25), Vec3(0, -500, 0));
+		applyForceOnBody(0, Vec3(0, -0.25, -0.25), Vec3(0, 500, 0));
+
+		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.25, 0.25, 0.25), 2);
+		applyForceOnBody(1, Vec3(0, 0, 0), Vec3(0, -600, 0));
+
+		addRigidBody(Vec3(0, -0.5, 0), Vec3(0.25, 0.25, 0.25), 2);
+		applyForceOnBody(2, Vec3(0, 0, 0), Vec3(0, 400, 0));
+
+		addRigidBody(Vec3(0.5, 0, 0), Vec3(0.25, 0.25, 0.25), 2);
+		applyForceOnBody(3, Vec3(0, 0, 0), Vec3(-200, 0, 0));
+
+		addRigidBody(Vec3(-0.5, 0, 0), Vec3(0.25, 0.25, 0.25), 2);
+		applyForceOnBody(4, Vec3(0, 0, 0), Vec3(100, 0 , 0));
+
+		grav = false;
 		break;
 	default:
 		cout << "Empty Test!\n";
@@ -85,7 +99,7 @@ void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed)
 	for(auto& r : bodies)
 	{
 		if (grav) {
-			r.F.push_back(pair<Vec3, Vec3>(Vec3(0, 0, 0), Vec3(0, -9.81, 0)));
+			r.F.push_back(pair<Vec3, Vec3>(Vec3(0, 0, 0), Vec3(0, -9.81, 0) * r.mass));
 		}
 		m_externalForce = Vec3();
 		for(auto& f : r.F)
