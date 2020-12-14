@@ -41,6 +41,10 @@ public:
 	void setOrientationOf(int i,Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
 
+	void selectBodyUp();
+	void selectBodyDown();
+	void moveSelectedBody(int dir);
+
 	boolean grav = false;
 private:
 	// Attributes
@@ -61,5 +65,6 @@ private:
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
+	int bodySelected = 0;
 	};
 #endif

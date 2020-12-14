@@ -1,3 +1,13 @@
+Select body using <- and -> (selectedBody on UI)
+apply force to center of mass using w,a,s,d,q,e:
+
+	w: +z
+a:-x		d: +x
+	s: -z		
+
+q: up(+z)	e: down(-y)
+
+
 -------------------------------------------------------------------------------
 --- Visual Studio 2013/15/17 Template Project for C++/DirectX11 Application ---
 --- Marc Treib, Florian Ferstl, Sept 2013 -------------------------------------

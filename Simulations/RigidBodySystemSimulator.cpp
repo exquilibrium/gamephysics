@@ -12,12 +12,14 @@ const char * RigidBodySystemSimulator::getTestCasesStr() {
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
 	this->DUC = DUC;
+	TwAddVarRO(DUC->g_pTweakBar, "selectedBody", TW_TYPE_INT32, &bodySelected, 0);
 	switch (m_iTestCase)
 	{
 	case 0:break;
 	case 1:
 		break;
-	case 2:break;
+	case 2:
+		break;
 	default:break;
 	}
 }
@@ -164,7 +166,7 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 			auto n = ci.normalWorld;
 			n = getNormalized(n);
 			auto cp_world = ci.collisionPointWorld;
-			cout << cp_world << endl;
+			//cout << cp_world << endl;
 			auto cp1_local = mat1_inv.transformVector(cp_world);
 			auto cp2_local = mat2_inv.transformVector(cp_world);
 
@@ -261,4 +263,42 @@ void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
 void RigidBodySystemSimulator::setVelocityOf(int i, Vec3 velocity)
 {
 	bodies[i].vcm = velocity;
+}
+
+void RigidBodySystemSimulator::selectBodyUp()
+{
+	bodySelected++;
+	bodySelected %= bodies.size();
+}
+
+void RigidBodySystemSimulator::selectBodyDown()
+{
+	bodySelected--;
+	if (bodySelected < 0) { bodySelected = bodies.size() - 1; }
+}
+
+void RigidBodySystemSimulator::moveSelectedBody(int dir)
+{
+	dir %= 6;
+	switch (dir) {
+		case 0:
+			applyForceOnBody(bodySelected, Vec3(0,0,0), Vec3(0,0,1)*10*bodies[bodySelected].mass);
+			break;
+		case 1:
+			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(-1, 0, 0) * 10 * bodies[bodySelected].mass);
+			break;
+		case 2:
+			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, 0, -1) * 10 * bodies[bodySelected].mass);
+			break;
+		case 3:
+			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(1, 0, 0) * 10 * bodies[bodySelected].mass);
+			break;
+		case 4:
+			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, 1, 0) * 10 * bodies[bodySelected].mass);
+			break;
+		case 5:
+			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, -1, 0) * 10 * bodies[bodySelected].mass);
+			break;
+
+	}
 }
