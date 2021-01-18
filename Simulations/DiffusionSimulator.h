@@ -10,7 +10,7 @@ public:
 	// Construtors
 	Grid(size_t m, size_t n) : n(n), m(m){
 		grid = new float[n * m];
-		memset(grid, 0.0f, n * m);
+		memset(grid, 0.0f, n * m * sizeof(float));
 	}
 
 	float get(int x, int y) {
@@ -27,6 +27,15 @@ public:
 
 	size_t getM() {
 		return m;
+	}
+
+	void print() {
+		for (int y = 0; y < m; y++) {
+			for (int x = 0; x < n; x++) {
+				std::cout << get(x, y) << ", ";
+			}
+			std::cout << "\n";
+		}
 	}
 
 private:

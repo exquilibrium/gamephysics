@@ -9,10 +9,10 @@ DiffusionSimulator::DiffusionSimulator()
 	m_vfMovableObjectPos = Vec3();
 	m_vfMovableObjectFinalPos = Vec3();
 	m_vfRotate = Vec3();
-	alpha = 1.0f;
+	alpha = 0.3f;
 	delta_t = 0.1f;
-	m = 25;
-	n = 25;
+	m = 20;
+	n = 20;
 	T = new Grid(m, n);
 	// to be implemented
 }
@@ -25,9 +25,12 @@ void DiffusionSimulator::reset(){
 		m_mouse.x = m_mouse.y = 0;
 		m_trackmouse.x = m_trackmouse.y = 0;
 		m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
+		delete T;
+		T = new Grid(m, n);
 		for (int y = 1; y < m - 1; y++) {
 			for (int x = 1; x < n - 1; x++) {
-				T->set(x, y, 0.5f);
+				float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+				T->set(r, x, y);
 			}
 		}
 }
@@ -36,8 +39,8 @@ void DiffusionSimulator::initUI(DrawingUtilitiesClass * DUC)
 {
 	this->DUC = DUC;
 	// to be implemented
-	TwAddVarRW(DUC->g_pTweakBar, "n", TW_TYPE_INT32, &n, "min=1");
-	TwAddVarRW(DUC->g_pTweakBar, "m", TW_TYPE_INT32, &m, "min=1");
+	TwAddVarRW(DUC->g_pTweakBar, "n", TW_TYPE_INT32, &n, "min=3");
+	TwAddVarRW(DUC->g_pTweakBar, "m", TW_TYPE_INT32, &m, "min=3");
 	TwAddVarRW(DUC->g_pTweakBar, "alpha", TW_TYPE_FLOAT, &alpha, "min=0");
 }
 
@@ -75,7 +78,12 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timestep) {//add your
 	for (int y = 1; y < m - 1; y++) {
 		for (int x = 1; x < n - 1; x++) {
 			float F = alpha * timestep / 4.0f;
-			float newVal = T->get(x, y) + F * (T->get(x + 1, y + 1) - T->get(x - 1, y + 1) - T->get(x + 1, y - 1) + T->get(x - 1, y - 1));
+			float u11 = T->get(x, y);
+			float u22 = T->get(x + 1, y + 1);
+			float u00 = T->get(x - 1, y - 1);
+			float u02 = T->get(x - 1, y + 1);
+			float u20 = T->get(x + 1, y - 1);
+			float newVal = u11 + F * (u22 - u20 - u02 + u00);
 			newT->set(newVal, x, y);
 		}
 	}
@@ -164,6 +172,11 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 {
 	// to be implemented
 	// update current setup for each frame
+	if (T->getM() != m || T->getN() != n) {
+		reset();
+		return;
+	}
+
 	switch (m_iTestCase)
 	{
 	case 0:
@@ -179,8 +192,8 @@ void DiffusionSimulator::drawObjects()
 {
 	// to be implemented
 	//visualization
-	int min = INT_MAX;
-	int max = INT_MIN;
+	float min = INT_MAX;
+	float max = INT_MIN;
 	for (int y = 0; y < m; y++) {
 		for (int x = 0; x < n; x++) {
 			float val = T->get(x, y);
