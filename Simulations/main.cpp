@@ -152,7 +152,6 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
 
 	if(bKeyDown)
 	{
-		RigidBodySystemSimulator* s = dynamic_cast<RigidBodySystemSimulator*>(g_pSimulator);
 		switch(nChar)
 		{
             // RETURN: toggle fullscreen
@@ -175,48 +174,6 @@ void CALLBACK OnKeyboard( UINT nChar, bool bKeyDown, bool bAltDown, void* pUserC
                 SAFE_RELEASE(pTex2D);
 
                 std::wcout << L"Screenshot written to " << ss.str() << std::endl;
-				break;
-			}
-			case VK_RIGHT:
-			{
-				if (s) { s->selectBodyUp(); }
-				TwRefreshBar(g_pDUC->g_pTweakBar);
-				break;
-			}
-			case VK_LEFT: 
-			{
-				if (s) { s->selectBodyDown(); }
-				TwRefreshBar(g_pDUC->g_pTweakBar);
-				break;
-			}
-			case ((int)'W'):
-			{
-				if (s) { s->moveSelectedBody(0); }
-				break;
-			}
-			case ((int)'A'):
-			{
-				if (s) { s->moveSelectedBody(1); }
-				break;
-			}
-			case ((int)'S'):
-			{
-				if (s) { s->moveSelectedBody(2); }
-				break;
-			}
-			case ((int)'D'):
-			{
-				if (s) { s->moveSelectedBody(3); }
-				break;
-			}
-			case ((int)'Q'):
-			{
-				if (s) { s->moveSelectedBody(4); }
-				break;
-			}
-			case ((int)'E'):
-			{
-				if (s) { s->moveSelectedBody(5); }
 				break;
 			}
             // F10: Toggle video recording
@@ -297,7 +254,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 	}
 	if(!g_bSimulateByStep){
 #ifdef ADAPTIVESTEP
-		//g_pSimulator->externalForcesCalculations(fElapsedTime);
+		g_pSimulator->externalForcesCalculations(fElapsedTime);
 		static float timeAcc = 0;
 		timeAcc += fElapsedTime * g_fTimeFactor;
 		int maxIter = 10;
@@ -311,7 +268,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 			timeAcc -= g_fTimestep;
 		}
 #else
-		//g_pSimulator->externalForcesCalculations(g_fTimestep);
+		g_pSimulator->externalForcesCalculations(g_fTimestep);
 		g_pSimulator->simulateTimestep(g_fTimestep);
 #endif
 	}else{

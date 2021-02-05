@@ -1,17 +1,7 @@
 #ifndef RIGIDBODYSYSTEMSIMULATOR_h
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
-#include "util\matrixbase.h"
-#include "util\vectorbase.h"
-#include "collisionDetect.h"
-#include <vector>
-#include <unordered_map>
-#include <set>
-using namespace std;
-using namespace GamePhysics;
-
-//add your header for your rigid body system, for e.g.,
-//#include "rigidBodySystem.h" 
+#include "rigidBodySystem.hpp"
 
 #define TESTCASEUSEDTORUNTEST 2
 
@@ -41,30 +31,14 @@ public:
 	void setOrientationOf(int i,Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
 
-	void selectBodyUp();
-	void selectBodyDown();
-	void moveSelectedBody(int dir);
-
-	boolean grav = false;
 private:
 	// Attributes
-	struct Rigidbody {
-		Mat4 transMat, scMat;
-		Mat4 I;
-		Vec3 w, L, vcm;
-		Quat r;
-		float mass;
-		vector<pair<Vec3, Vec3>> F;
-	};
-	vector<Rigidbody> bodies;
-	set<pair<int, int>> collisions;
+	RigidBodySystem * m_pRigidBodySystem;
 	Vec3 m_externalForce;
-	float c = 1;
 
 	// UI Attributes
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
-	int bodySelected = 0;
 	};
 #endif

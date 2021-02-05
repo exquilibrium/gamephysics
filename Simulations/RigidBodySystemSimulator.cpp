@@ -1,194 +1,166 @@
 #include "RigidBodySystemSimulator.h"
-#include <unordered_set>
-
-RigidBodySystemSimulator::RigidBodySystemSimulator() {
-	m_iTestCase = 0;
-	collisions = set<pair<int, int>>();
-}
-
-const char * RigidBodySystemSimulator::getTestCasesStr() {
-	return " simple_single_body_simulation,Two-rigid-body_collision scene,Complex_simulation";
-}
-
-void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
-	this->DUC = DUC;
-	TwAddVarRO(DUC->g_pTweakBar, "selectedBody", TW_TYPE_INT32, &bodySelected, 0);
-	switch (m_iTestCase)
-	{
-	case 0:break;
-	case 1:
-		break;
-	case 2:
-		break;
-	default:break;
-	}
-}
-
-void RigidBodySystemSimulator::reset() {
-	m_mouse.x = m_mouse.y = 0;
-	m_trackmouse.x = m_trackmouse.y = 0;
-	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
-
-	bodies.clear();
-	collisions.clear();
-}
-
-void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
+#define DebugRigidBody
+RigidBodySystemSimulator::RigidBodySystemSimulator()
 {
-	std::mt19937 eng;
-	std::uniform_real_distribution<float> randCol(0.0f, 1.0f);
-	std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
-	for(auto& r : bodies)
-	{
-		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
-		DUC->drawRigidBody(r.scMat * r.r.getRotMat() * r.transMat);
-	}
+	m_iTestCase = 1;
+	m_pRigidBodySystem = new RigidBodySystem();
+}
+
+
+const char * RigidBodySystemSimulator::getTestCasesStr()
+{
+	return "BasicTest,Setup1,Setup2";
+}
+
+void RigidBodySystemSimulator::reset(){
+		m_mouse.x = m_mouse.y = 0;
+		m_trackmouse.x = m_trackmouse.y = 0;
+		m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
+}
+
+void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass * DUC)
+{
+	this->DUC	 =	DUC;
 }
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
-	reset();
-	Mat4 m;
-	switch (m_iTestCase)
-	{
-	case 0:
-		cout << "simple_single_body_simulation!\n";
-		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 10);
-		applyForceOnBody(0, Vec3(0.25, 0.25, 0), Vec3(100, -100, 0));
-		/*addRigidBody(Vec3(-0.1f, -0.2f, 0.1f), Vec3(0.4f, 0.2f, 0.2f), 100.0f);
-		applyForceOnBody(0, Vec3(0.0, 0.0f, 0.0), Vec3(0, 0, 200));*/
-		grav = false;
-		break;
-	case 1:
-		cout << "Two-rigid-body_collision scene!\n";
-		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.5, 0.5, 0.5), 5);
-		applyForceOnBody(0, Vec3(0.0, 0.0, 0), Vec3(0, -1000, 0));
-		addRigidBody(Vec3(0.0f, -0.2f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), 5);
-		applyForceOnBody(1, Vec3(0.0, 0.0f, 0.0), Vec3(0, 1000, 0));
-		grav = false;
-		break;
-	case 2:
-		cout << "Complex_simulation!\n";
-		addRigidBody(Vec3(0, 0.0, 0), Vec3(0.25, 0.25, 0.25), 10);
-		applyForceOnBody(0, Vec3(0.25,0.25, 0), Vec3(0, -500, 0));
-		applyForceOnBody(0, Vec3(-0.25, -0.25, 0), Vec3(0, 500, 0));
-		applyForceOnBody(0, Vec3(0, 0.25, 0.25), Vec3(0, -500, 0));
-		applyForceOnBody(0, Vec3(0, -0.25, -0.25), Vec3(0, 500, 0));
-
-		addRigidBody(Vec3(0, 0.5, 0), Vec3(0.25, 0.25, 0.25), 2);
-		applyForceOnBody(1, Vec3(0, 0, 0), Vec3(0, -600, 0));
-
-		addRigidBody(Vec3(0, -0.5, 0), Vec3(0.25, 0.25, 0.25), 2);
-		applyForceOnBody(2, Vec3(0, 0, 0), Vec3(0, 400, 0));
-
-		addRigidBody(Vec3(0.5, 0, 0), Vec3(0.25, 0.25, 0.25), 2);
-		applyForceOnBody(3, Vec3(0, 0, 0), Vec3(-200, 0, 0));
-
-		addRigidBody(Vec3(-0.5, 0, 0), Vec3(0.25, 0.25, 0.25), 2);
-		applyForceOnBody(4, Vec3(0, 0, 0), Vec3(100, 0 , 0));
-
-		grav = false;
-		break;
-	default:
-		cout << "Empty Test!\n";
-		break;
-	}
+	m_pRigidBodySystem->SceneSetup(m_iTestCase);
 }
 
-void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed)
+
+void RigidBodySystemSimulator::externalForcesCalculations(float elapsedTime)
 {
-	for(auto& r : bodies)
+	Vec3 pullforce(0, 0, 0);
+	Point2D mouseDiff;
+	mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
+	mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
+	if (mouseDiff.x != 0 || mouseDiff.y != 0)
 	{
-		if (grav) {
-			r.F.push_back(pair<Vec3, Vec3>(Vec3(0, 0, 0), Vec3(0, -9.81, 0) * r.mass));
-		}
-		m_externalForce = Vec3();
-		for(auto& f : r.F)
-		{
-			m_externalForce += f.second;
-		}
-		Vec3 translate = timeElapsed * r.vcm;
-		Mat4 t = Mat4();
-		t.initTranslation(translate.x, translate.y, translate.z);
-		r.transMat *= t;
-
-		r.vcm += timeElapsed * (m_externalForce / r.mass);
+		Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
+		worldViewInv = worldViewInv.inverse();
+		Vec3 forceView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
+		Vec3 forceWorld = worldViewInv.transformVectorNormal(forceView);
+		float forceScale = 0.2f;
+		pullforce = pullforce + (forceWorld * forceScale);
 	}
+	//pullforce -=  pullforce * 5.0f * timeElapsed;
+	
+	m_externalForce = pullforce;
+	
 }
-
 void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 {
-	externalForcesCalculations(timeStep);
-
-	for(auto& r : bodies)
+	// one fixed time step
+	switch (m_iTestCase)
 	{
-		Vec3 q = Vec3();
-		for(auto& f : r.F)
+	case 0: // case 0 do nothing
+		break;
+	case 1:
+	{
+		m_pRigidBodySystem->addGlobalFrameForce(m_externalForce);
+		m_pRigidBodySystem->update(timeStep);
+	}
+		break;
+	case 2:
+	{
+		if (DXUTIsKeyDown(VK_LBUTTON))
+			m_pRigidBodySystem->dragTogether();
+		m_pRigidBodySystem->addGlobalFrameForce(m_externalForce);
+		m_pRigidBodySystem->update(timeStep);
+			
+	}
+	break;		
+	default:
+		break;
+	}
+}
+void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
+{
+		Vec3 colors[3] = {Vec3(0.9,0.97,1), Vec3(0.5,0.5,1), Vec3(1,1,0)};
+		int i = 0;
+		for (RigidBody& rigidBody : m_pRigidBodySystem->m_rigidBodies)
 		{
-			q += cross( f.first, f.second);
-		}
-		r.F.clear();
+			DUC->setUpLighting(Vec3(0,0,0),0.4*Vec3(1,1,1),2000.0,colors[i%3]);
+			DUC->drawRigidBody(rigidBody.getObj2World());
+			++i;
+#ifdef DebugRigidBody
+			std::mt19937 eng;
+			std::uniform_real_distribution<float> randCol( 0.0f, 1.0f);
+			std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
+			DUC->setUpLighting(Vec3(),0.4*Vec3(1,1,1),100,0.6*Vec3(randCol(eng),randCol(eng), randCol(eng)));
+			//DUC->drawSphere(rigidBody.collisonPoint,Vec3(0.05f, 0.05f, 0.05f));
+			DUC->beginLine();
+			Vec3 velocity = rigidBody.totalVelocity;
+			DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DeepPink,rigidBody.collisonPoint.toDirectXVector()+rigidBody.relVelocity.toDirectXVector(),Colors::DeepPink);
 
-		r.r += ((timeStep / 2) * Quat(r.w.x, r.w.y, r.w.z,0)*(r.r));
-
-		r.L += timeStep * q;
-
-		Mat4 rt = Mat4(r.r.getRotMat());
-		rt.transpose();
-		Mat4 I = r.r.getRotMat() * r.I * rt;
-
-		r.w = I * r.L;
-	}
-
-	for (int i = 0; i < bodies.size(); i++) {
-		auto b1 = bodies[i];
-		auto mat1 = b1.scMat * b1.r.getRotMat() * b1.transMat;
-		auto mat1_inv = Mat4(mat1);
-		mat1_inv.inverse();
-		for (int j = i + 1; j < bodies.size(); j++) {
-			auto b2 = bodies[j];
-			auto mat2 = b2.scMat * b2.r.getRotMat() * b2.transMat;
-			auto mat2_inv = Mat4(mat2);
-			mat2_inv.inverse();
-
-			auto ci = checkCollisionSAT(mat1, mat2);
-			
-			
-			if (!ci.isValid) {
-				collisions.erase(minmax(i, j));
-				continue;
+			if(i==1){
+				DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DarkGreen,rigidBody.collisonPoint.toDirectXVector()+velocity.toDirectXVector(),Colors::DarkGreen);
+				DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::Yellow,rigidBody.collisonPoint.toDirectXVector()+rigidBody.collisioNormal.toDirectXVector(),Colors::Orange);
 			}
+			else{ 
+				DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DarkRed,rigidBody.collisonPoint.toDirectXVector()+velocity.toDirectXVector(),Colors::DarkRed);
+				DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DarkCyan,rigidBody.collisonPoint.toDirectXVector()+rigidBody.collisioNormal.toDirectXVector(),Colors::DarkViolet);
 
-			//if (collisions.count(minmax(i, j)))
-				//continue;
-
-			auto n = ci.normalWorld;
-			n = getNormalized(n);
-			auto cp_world = ci.collisionPointWorld;
-			//cout << cp_world << endl;
-			auto cp1_local = mat1_inv.transformVector(cp_world);
-			auto cp2_local = mat2_inv.transformVector(cp_world);
-
-			auto v1_world = b1.vcm + cross(b1.w, cp1_local);
-			auto v2_world = b2.vcm + cross(b2.w, cp2_local);
-			auto v_rel =  v2_world - v1_world;
-
-			if (dot(v_rel, n) < 0.0) {
-				continue;
 			}
-			auto J_nom = -(1 + c) * v_rel * n;
-			auto J_denom = 1.0 / b1.mass + 1.0 / b2.mass + (cross(b1.I * cross(cp1_local, n), cp1_local) + cross(b2.I * cross(cp2_local, n), cp2_local)) * n;
-			auto J = J_nom / J_denom;
+			DUC->endLine();
 
-			bodies[j].vcm += J * n / b1.mass;
-			bodies[j].L += cross(cp1_local, J * n);
-			bodies[i].vcm -= J * n / b2.mass;
-			bodies[i].L -= cross(cp2_local, J * n);
-
-			collisions.insert(minmax(i, j));
+/*
+			std::vector<XMVECTOR> corners = rigidBody.getCorners();
+			Vec3 colors[8] = {Vec3(0,0,0),Vec3(0,0,1),Vec3(0,1,0),Vec3(0,1,1),Vec3(1,0,0),Vec3(1,0,1),Vec3(1,1,0),Vec3(1,1,1)};
+			for(int j = 0; j< 8;j++)
+			{
+				DUC->setUpLighting(Vec3(),0.4*Vec3(1,1,1),100,colors[j]);
+				DUC->drawSphere(corners[j],Vec3(0.02f, 0.02f, 0.02f));
+			
+			}
+			*/
+#endif
 		}
-	}
+}
+
+int RigidBodySystemSimulator::getNumberOfRigidBodies()
+{
+	return m_pRigidBodySystem->m_rigidBodies.size();
+}
+
+Vec3 RigidBodySystemSimulator::getPositionOfRigidBody(int i)
+{
+	return m_pRigidBodySystem->m_rigidBodies[i].getCenter();
+}
+
+Vec3 RigidBodySystemSimulator::getLinearVelocityOfRigidBody(int i)
+{
+	return m_pRigidBodySystem->m_rigidBodies[i].getVelocity();
+}
+
+Vec3 RigidBodySystemSimulator::getAngularVelocityOfRigidBody(int i)
+{
+	return m_pRigidBodySystem->m_rigidBodies[i].getAngularV();
+}
+
+void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
+{
+	m_pRigidBodySystem->m_rigidBodies[i].addForceWorld(force,loc);
+}
+
+void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
+{
+	m_pRigidBodySystem->m_rigidBodies.emplace_back(position, size, mass);
+	m_pRigidBodySystem->m_rigidBodies.back().update(0.0f);
+
+}
+
+void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
+{
+	m_pRigidBodySystem->m_rigidBodies[i].setRotation(orientation);
+
+}
+
+void RigidBodySystemSimulator::setVelocityOf(int i,Vec3 velocity)
+{
+	m_pRigidBodySystem->m_rigidBodies[i].setVelocity(velocity);
 }
 
 void RigidBodySystemSimulator::onClick(int x, int y)
@@ -203,102 +175,4 @@ void RigidBodySystemSimulator::onMouse(int x, int y)
 	m_oldtrackmouse.y = y;
 	m_trackmouse.x = x;
 	m_trackmouse.y = y;
-}
-
-int RigidBodySystemSimulator::getNumberOfRigidBodies()
-{
-	return bodies.size();
-}
-
-Vec3 RigidBodySystemSimulator::getPositionOfRigidBody(int i)
-{
-	Vec3 res;
-	bodies[i].transMat.decompose(res, Vec3(), Vec3(), Vec3());
-	return res;
-}
-
-Vec3 RigidBodySystemSimulator::getLinearVelocityOfRigidBody(int i)
-{
-	return bodies[i].vcm;
-}
-
-Vec3 RigidBodySystemSimulator::getAngularVelocityOfRigidBody(int i)
-{
-	return bodies[i].w;
-}
-
-void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
-{
-	bodies[i].F.push_back(pair<Vec3, Vec3>(loc,force));
-}
-
-void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
-{
-	Rigidbody b = {};
-	b.transMat.initTranslation(position.x, position.y, position.z);
-	b.scMat.initScaling(size.x, size.y, size.z);
-	/*b.transform.value[0][0] = size.x;
-	b.transform.value[1][1] = size.y;
-	b.transform.value[2][2] = size.z;*/
-	b.mass = mass;
-
-	b.I.value[0][0] = (1/12.0f) * b.mass *(size.y*size.y + size.z * size.z);
-	b.I.value[1][1] = (1 / 12.0f) * b.mass * (size.x * size.x + size.z * size.z);
-	b.I.value[2][2] = (1 / 12.0f) * b.mass * (size.x * size.x + size.y * size.y);
-	b.I.value[3][3] = 1;
-
-	b.I = b.I.inverse();
-
-	Mat4 id = Mat4();
-	id.initId();
-	b.r = Quat(id);
-	bodies.push_back(b);
-}
-
-void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
-{
-	bodies[i].r = orientation;
-}
-
-void RigidBodySystemSimulator::setVelocityOf(int i, Vec3 velocity)
-{
-	bodies[i].vcm = velocity;
-}
-
-void RigidBodySystemSimulator::selectBodyUp()
-{
-	bodySelected++;
-	bodySelected %= bodies.size();
-}
-
-void RigidBodySystemSimulator::selectBodyDown()
-{
-	bodySelected--;
-	if (bodySelected < 0) { bodySelected = bodies.size() - 1; }
-}
-
-void RigidBodySystemSimulator::moveSelectedBody(int dir)
-{
-	dir %= 6;
-	switch (dir) {
-		case 0:
-			applyForceOnBody(bodySelected, Vec3(0,0,0), Vec3(0,0,1)*10*bodies[bodySelected].mass);
-			break;
-		case 1:
-			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(-1, 0, 0) * 10 * bodies[bodySelected].mass);
-			break;
-		case 2:
-			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, 0, -1) * 10 * bodies[bodySelected].mass);
-			break;
-		case 3:
-			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(1, 0, 0) * 10 * bodies[bodySelected].mass);
-			break;
-		case 4:
-			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, 1, 0) * 10 * bodies[bodySelected].mass);
-			break;
-		case 5:
-			applyForceOnBody(bodySelected, Vec3(0, 0, 0), Vec3(0, -1, 0) * 10 * bodies[bodySelected].mass);
-			break;
-
-	}
 }

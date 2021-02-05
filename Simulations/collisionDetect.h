@@ -1,7 +1,6 @@
 ﻿// header file:
 #include <DirectXMath.h>
 #include <Vector>
-#include "util\matrixbase.h"
 using namespace DirectX;
 
 // the return structure, with these values, you should be able to calculate the impulse
@@ -227,7 +226,7 @@ namespace collisionTools{
 	{
 		std::vector<XMVECTOR> corners = getCorners(obj2World);
 		float min = 1000;
-		XMVECTOR vertex = XMVECTOR();
+		XMVECTOR vertex;
 		for (int i = 0; i < corners.size(); i++)
 		{
 			float value = XMVectorGetX(XMVector3Dot(corners[i], toCenter));
@@ -328,10 +327,6 @@ namespace collisionTools{
 				}
 			}
 		}
-
-		if (fromWhere == -1)
-			return { false, Vec3(0.0), Vec3(0.0), 0.0 };
-
 		// if we get here then we know that every axis had overlap on it
 		// so we can guarantee an intersection
 		XMVECTOR normal;
@@ -476,7 +471,7 @@ inline void testCheckCollision(int caseid){
 			std::printf("collision point : %f, %f, %f\n", (simpletest.collisionPointWorld).x, (simpletest.collisionPointWorld).y, simpletest.collisionPointWorld.z);
 		}
 		// case 3 result:
-		// collision detected at normal: -1.000000, 0.000000, -0.000000
+		// collision detected at normal: -1.000000, 0.000000, 0.000000
 		// collision point : 0.000405, 0.000000, 0.000000
 	}
 }
