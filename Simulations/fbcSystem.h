@@ -14,7 +14,7 @@ using std::cout;
 class FBCSystem
 {
 public:
-	FBCSystem();
+	FBCSystem() : m_cube(0), m_leapfrogFirst(false), m_rigidBodies(){}
 	virtual ~FBCSystem();
 
 	void initTweakBar(TwBar* tweakBar);
@@ -39,8 +39,6 @@ public:
 		int point2;
 		float initialLength;
 	};	
-
-	FBCSystem() : m_cube(0), m_leapfrogFirst(false){}
 
 	int AddPoint(const Vec3& pos, bool fixed)
 	{

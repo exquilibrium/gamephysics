@@ -224,9 +224,8 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sim\fbc.cpp" />
-    <ClCompile Include="..\..\sim\fbcSystem.cpp" />
-    <ClCompile Include="..\..\sim\FBCSystemSimulator.cpp" />
+    <ClCompile Include="fbcSystem.cpp" />
+    <ClCompile Include="FBCSystemSimulator.cpp" />
     <ClCompile Include="massspringsystem.cpp" />
     <ClCompile Include="MassSpringSystemSimulator.cpp" />
     <ClCompile Include="rigidBody.cpp" />
@@ -237,11 +236,10 @@
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\sim\fbc.h" />
-    <ClInclude Include="..\..\sim\fbcSystem.h" />
-    <ClInclude Include="..\..\sim\FBCSystemSimulator.h" />
     <ClInclude Include="collisionDetect.h" />
     <ClInclude Include="DrawingUtilitiesClass.h" />
+    <ClInclude Include="fbcSystem.h" />
+    <ClInclude Include="FBCSystemSimulator.h" />
     <ClInclude Include="massspringsystem.h" />
     <ClInclude Include="MassSpringSystemSimulator.h" />
     <ClInclude Include="RigidBodySystemSimulator.h" />

@@ -1,9 +1,5 @@
 #include "fbcSystem.h"
 using namespace GamePhysics;
-FBCSystem::FBCSystem() :
-	m_rigidBodies()
-{
-}
 
 FBCSystem::~FBCSystem()
 {

@@ -68,7 +68,6 @@ private:
 
 	// UI Attributes
 	int m_iCube;
-	Vec3 m_externalForce;
 
 	Point2D m_mouse;
 	Point2D m_trackmouse;
