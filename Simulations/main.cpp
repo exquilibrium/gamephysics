@@ -21,9 +21,10 @@ using namespace GamePhysics;
 //#define ADAPTIVESTEP
 
 //#define TEMPLATE_DEMO
-//#define MASS_SPRING_SYSTEM
-#define RIGID_BODY_SYSTEM
+#define MASS_SPRING_SYSTEM
+//#define RIGID_BODY_SYSTEM
 //#define SPH_SYSTEM
+//#define FBC_SYSTEM // <<< Force Based Coupling
 
 #ifdef TEMPLATE_DEMO
 #include "TemplateSimulator.h"
@@ -36,6 +37,9 @@ using namespace GamePhysics;
 #endif
 #ifdef SPH_SYSTEM
 //#include "SPHSystemSimulator.h"
+#endif
+#ifdef FBC_SYSTEM
+#include "FBCSystemSimulator.h" // <<< Force Based Coupling
 #endif
 
 DrawingUtilitiesClass * g_pDUC;
@@ -369,6 +373,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef SPH_SYSTEM
 	//g_pSimulator= new SPHSystemSimulator();
+#endif
+#ifdef FPC_SYSTEM
+	g_pSimulator = new FBCSystemSimulator(); // <<< Force Based Coupling
 #endif
 	g_pSimulator->reset();
 
