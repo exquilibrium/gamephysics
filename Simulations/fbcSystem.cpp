@@ -62,6 +62,16 @@ void FBCSystem::update(float deltaTime)
 		{
 			if (RigidBody::collide(m_rigidBodies[i], m_rigidBodies[j]))
 			{
+				m_rigidBodies[i].m_angularV = 0;
+				m_rigidBodies[j].m_angularV = 0;
+
+				m_rigidBodies[i].m_momentum = 0;
+				m_rigidBodies[j].m_momentum = 0;
+
+
+				m_rigidBodies[i].m_velocity = 0;
+				m_rigidBodies[j].m_velocity = 0;
+
 			}
 		}
 	}
