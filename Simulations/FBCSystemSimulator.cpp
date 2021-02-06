@@ -78,7 +78,7 @@ void FBCSystemSimulator::externalForcesCalculations(float elapsedTime)
 	}
 	//pullforce -=  pullforce * 5.0f * timeElapsed;
 	
-	m_externalForce = pullforce; // + gravity
+	m_externalForce = pullforce + Vec3(0,-9.81,0);
 	
 }
 void FBCSystemSimulator::simulateTimestep(float timeStep)

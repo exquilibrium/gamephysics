@@ -17,6 +17,10 @@ void FBCSystem::SceneSetup(int sceneflag)
 		m_rigidBodies.emplace_back(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 		m_rigidBodies.emplace_back(Vec3(0.0f, -0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 		m_rigidBodies.emplace_back(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
+
+		m_rigidBodies.emplace_back(Vec3(0.0f, -0.75f, 0.0f), Vec3(10000, 0.05f, 10000), 10000);
+		m_rigidBodies[3].update(0);
+		m_rigidBodies[3].fixed = true;
 		AddSpring(0,1);
 
 		m_rigidBodies[0].addForceWorld(Vec3(0,200,0), Vec3(0,0.5,0));
@@ -48,7 +52,9 @@ void FBCSystem::update(float deltaTime)
 
 	for (RigidBody& rigidBody : m_rigidBodies)
 	{
-		rigidBody.update(deltaTime);
+		if (!rigidBody.fixed) {
+			rigidBody.update(deltaTime);
+		}
 	}
 	for (size_t i = 0; i < m_rigidBodies.size(); ++i)
 	{

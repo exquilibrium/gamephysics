@@ -23,6 +23,7 @@ class RigidBody
 {
 public:
 	static bool collide(RigidBody& body1, RigidBody& body2);
+	bool fixed = false;
 
 	RigidBody();
 	RigidBody(const GamePhysics::Vec3 center, const GamePhysics::Vec3 size, float mass);

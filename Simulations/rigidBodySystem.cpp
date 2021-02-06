@@ -86,7 +86,9 @@ void RigidBodySystem::update(float deltaTime)
 
 	for (RigidBody& rigidBody : m_rigidBodies)
 	{
-		rigidBody.update(deltaTime);
+		if (!rigidBody.fixed) {
+			rigidBody.update(deltaTime);
+		}
 	}
 	for (size_t i = 0; i < m_rigidBodies.size(); ++i)
 	{
