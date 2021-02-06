@@ -374,7 +374,7 @@ int main(int argc, char* argv[])
 #ifdef SPH_SYSTEM
 	//g_pSimulator= new SPHSystemSimulator();
 #endif
-#ifdef FPC_SYSTEM
+#ifdef FBC_SYSTEM
 	g_pSimulator = new FBCSystemSimulator(); // <<< Force Based Coupling
 #endif
 	g_pSimulator->reset();

@@ -15,7 +15,7 @@ FBCSystemSimulator::FBCSystemSimulator()
 
 const char * FBCSystemSimulator::getTestCasesStr()
 {
-	return "BasicTest,Setup1,Setup2";
+	return "BasicTest";
 }
 
 void FBCSystemSimulator::reset(){
@@ -87,17 +87,15 @@ void FBCSystemSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 0: // case 0 do nothing
+		m_pFBCSystem->addGlobalFrameForce(m_externalForce);
+		m_pFBCSystem->ComputeSpringForces();
+		m_pFBCSystem->update(timeStep);
 		break;
 	case 1:
 	{
 		m_pFBCSystem->addGlobalFrameForce(m_externalForce);
+		m_pFBCSystem->ComputeSpringForces();
 		m_pFBCSystem->update(timeStep);
-        switch (m_iIntegrator)
-			{
-				case 0: m_pFBCSystem->AdvanceEuler(timeStep); break;
-				case 1: m_pFBCSystem->AdvanceLeapFrog(timeStep); break;
-				case 2: m_pFBCSystem->AdvanceMidPoint(timeStep); break;
-			}
 	}
 		break;
 	case 2:
@@ -105,19 +103,13 @@ void FBCSystemSimulator::simulateTimestep(float timeStep)
 		if (DXUTIsKeyDown(VK_LBUTTON))
 			m_pFBCSystem->dragTogether();
 		m_pFBCSystem->addGlobalFrameForce(m_externalForce);
+		m_pFBCSystem->ComputeSpringForces();
 		m_pFBCSystem->update(timeStep);
 
         m_pFBCSystem->SetGravity(m_externalForce);
         m_pFBCSystem->SetMass(m_fMass);
         m_pFBCSystem->SetStiffness(m_fStiffness);
         m_pFBCSystem->SetDamping(m_fDamping);
-
-        switch (m_iIntegrator)
-        {
-            case 0: m_pFBCSystem->AdvanceEuler(timeStep); m_pFBCSystem->BoundingBoxCheck(); break;
-            case 1: m_pFBCSystem->AdvanceLeapFrog(timeStep); m_pFBCSystem->BoundingBoxCheck(); break;
-            case 2: m_pFBCSystem->AdvanceMidPoint(timeStep); m_pFBCSystem->BoundingBoxCheck(); break;
-        }	
 	}
 	break;		
 	default:
@@ -168,20 +160,12 @@ void FBCSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 		}
 
 		DUC->setUpLighting(Vec3(),0.4*Vec3(1,1,1),100,0.6*Vec3(0.83,0.36,0.36));
-		auto& points = m_pFBCSystem->GetPoints();
-		float pointSize = 0.01f;
-
-		for (size_t i=0; i<points.size(); i++)
-		{
-			DUC->drawSphere(points[i].pos, Vec3(pointSize,pointSize,pointSize));
-		}
-
 		DUC->beginLine();
 		auto& springs = m_pFBCSystem->GetSprings();
 		for(size_t i=0; i<springs.size(); i++)
 		{
 			Vec3 color = Vec3(0,0.4,0);
-			DUC->drawLine(points[springs[i].point1].pos,color,points[springs[i].point2].pos,color);	
+			DUC->drawLine(springs[i].body1->getCenter(),color,springs[i].body2->getCenter(),color);	
 		}
 		DUC->endLine();
 }
@@ -248,13 +232,6 @@ void FBCSystemSimulator::setDampingFactor(float damping)
 	m_pFBCSystem->SetDamping(m_fDamping);
 }
 
-int FBCSystemSimulator::addMassPoint(Vec3 position, Vec3 velocity, bool isFixed)
-{
-	int index = m_pFBCSystem->AddPoint(position,isFixed);
-	m_pFBCSystem->SetPointVelocity(index, velocity);
-	return index;	
-}
-
 void FBCSystemSimulator::addSpring(int index1, int index2, float initialLength)
 {
 	 m_pFBCSystem->AddSpring(index1,index2,initialLength);
@@ -262,7 +239,7 @@ void FBCSystemSimulator::addSpring(int index1, int index2, float initialLength)
 
 int FBCSystemSimulator::getNumberOfMassPoints()
 {
-	return m_pFBCSystem->GetPoints().size();
+	return m_pFBCSystem->m_rigidBodies.size();
 }
 
 int FBCSystemSimulator::getNumberOfSprings()
@@ -272,12 +249,12 @@ int FBCSystemSimulator::getNumberOfSprings()
 
 Vec3 FBCSystemSimulator::getPositionOfMassPoint(int index)
 {
-	return m_pFBCSystem->GetPoints()[index].pos;
+	return m_pFBCSystem->m_rigidBodies[index].getCenter();
 }
 
 Vec3 FBCSystemSimulator::getVelocityOfMassPoint(int index)
 {
-	return m_pFBCSystem->GetPoints()[index].vel;
+	return m_pFBCSystem->m_rigidBodies[index].getVelocity();
 }
 
 void FBCSystemSimulator::applyExternalForce(Vec3 force)
