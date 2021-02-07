@@ -11,21 +11,23 @@ void FBCSystem::SceneSetup(int sceneflag)
 	m_rigidBodies.clear();
 	m_springs.clear();
 	m_stiffness = 40.0f;
-	m_damping = 0.0f;
+	m_damping = 0.0;
 	if (sceneflag == 0)
 	{// basic test
 		m_rigidBodies.emplace_back(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 		m_rigidBodies.emplace_back(Vec3(0.0f, -0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 		m_rigidBodies.emplace_back(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 
-		m_rigidBodies.emplace_back(Vec3(0.0f, -0.75f, 0.0f), Vec3(10000, 0.05f, 10000), 10000);
+		m_rigidBodies.emplace_back(Vec3(0.0f, -0.75f, 0.0f), Vec3(10000, 0.2f, 10000), 10000);
 		m_rigidBodies[3].update(0);
 		m_rigidBodies[3].fixed = true;
 		AddSpring(0,1);
 
-		m_rigidBodies[0].addForceWorld(Vec3(0,200,0), Vec3(0,0.5,0));
-		m_rigidBodies[1].addForceWorld(Vec3(0, -200, 0), Vec3(0, -0.5, 0));
-		m_rigidBodies[2].addForce(Vec3(-200,0, 0), Vec3(0, 0, 0));
+		//m_rigidBodies[0].addForceWorld(Vec3(0,200,0), Vec3(0,0.5,0));
+		//m_rigidBodies[1].addForceWorld(Vec3(0, -200, 0), Vec3(0, -0.5, 0));
+		m_rigidBodies[2].addForce(Vec3(-2000,0, 0), Vec3(0, 0, 0));
+
+		m_rigidBodies[0].setRotation(Quat(1,1,0));
 	}
 }
 
@@ -44,6 +46,7 @@ void FBCSystem::addGlobalFrameForce(const Vec3 force)
 	for (RigidBody& rigidBody : m_rigidBodies)
 	{
 		rigidBody.addForceWorld(force, XMVectorZero());
+		rigidBody.addForce(m_gravity, XMVectorZero());
 	}
 }
 
@@ -62,15 +65,12 @@ void FBCSystem::update(float deltaTime)
 		{
 			if (RigidBody::collide(m_rigidBodies[i], m_rigidBodies[j]))
 			{
-				m_rigidBodies[i].m_angularV = 0;
-				m_rigidBodies[j].m_angularV = 0;
-
-				m_rigidBodies[i].m_momentum = 0;
-				m_rigidBodies[j].m_momentum = 0;
+				m_rigidBodies[i].m_momentum = m_rigidBodies[i].m_momentum * (1.0f-m_damping);
+				m_rigidBodies[j].m_momentum = m_rigidBodies[j].m_momentum * (1.0f - m_damping);
 
 
-				m_rigidBodies[i].m_velocity = 0;
-				m_rigidBodies[j].m_velocity = 0;
+				m_rigidBodies[i].m_velocity = m_rigidBodies[i].m_velocity * (1.0f - m_damping);
+				m_rigidBodies[j].m_velocity = m_rigidBodies[j].m_velocity * (1.0f - m_damping);
 
 			}
 		}

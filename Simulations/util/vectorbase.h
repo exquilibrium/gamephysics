@@ -180,6 +180,7 @@ public:
 	// expe compatibility functions
 	void makeFloor(const vector3Dim<Scalar>& cmp);
 	void makeCeil(const vector3Dim<Scalar>& cmp);
+	void clampZero(const vector3Dim<Scalar>& threshold);
 	Scalar squaredDistanceTo(const vector3Dim<Scalar>& vec) const;
 
     // Returns true if the vector's s components are all greater that the ones of the vector it is compared against.
@@ -1188,6 +1189,15 @@ inline void vector3Dim<Scalar>::makeCeil(const vector3Dim<Scalar>& cmp)
     if( cmp.x > x ) x = cmp.x;
     if( cmp.y > y ) y = cmp.y;
     if( cmp.z > z ) z = cmp.z;
+}
+
+//--------------------------------------------------------------------------------
+template<class Scalar>
+inline void vector3Dim<Scalar>::clampZero(const vector3Dim<Scalar>& threshold)
+{
+	if (abs(x) < threshold.x) x = 0;
+	if (abs(y) < threshold.y) y = 0;
+	if (abs(z) < threshold.z) z = 0;
 }
 
 //--------------------------------------------------------------------------------

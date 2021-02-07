@@ -73,12 +73,13 @@ void FBCSystemSimulator::externalForcesCalculations(float elapsedTime)
 		worldViewInv = worldViewInv.inverse();
 		Vec3 forceView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
 		Vec3 forceWorld = worldViewInv.transformVectorNormal(forceView);
-		float forceScale = 0.2f;
+		float forceScale = 0.0f;
 		pullforce = pullforce + (forceWorld * forceScale);
 	}
 	//pullforce -=  pullforce * 5.0f * timeElapsed;
 	
-	m_externalForce = pullforce + Vec3(0,-9.81,0);
+	m_externalForce = pullforce;
+	m_pFBCSystem->SetGravity(Vec3(0,-9.81,0));
 	
 }
 void FBCSystemSimulator::simulateTimestep(float timeStep)

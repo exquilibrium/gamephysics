@@ -57,11 +57,25 @@ bool RigidBody::collide(RigidBody& body0, RigidBody& body1)
 	const float impulse = numerator / denominator;
 
 	GamePhysics::Vec3 impulseNormal = impulse * info.normalWorld;
-	body0.m_velocity += impulseNormal * body0.m_massInverse;
-	body1.m_velocity -= impulseNormal * body1.m_massInverse;
+	if (body0.fixed) {
+		body1.m_velocity = -body1.m_velocity * 0.7;
+		body1.m_velocity.clampZero(GamePhysics::Vec3(0.001, 0.001, 0.001));
+		body1.m_momentum = -cross(xbWorld, impulseNormal) * 0.7;
+		body1.m_momentum.clampZero(GamePhysics::Vec3(0.1, 0.1, 0.1));
+	}
+	else if (body1.fixed) {
+		body0.m_velocity = -body0.m_velocity * 0.7;
+		body0.m_velocity.clampZero(GamePhysics::Vec3(0.001, 0.001, 0.001));
+		body0.m_momentum = cross(xaWorld, impulseNormal) * 0.7;
+		body0.m_momentum.clampZero(GamePhysics::Vec3(0.1, 0.1, 0.1));
+	}
+	else {
+		body0.m_velocity += impulseNormal * body0.m_massInverse;
+		body1.m_velocity -= impulseNormal * body1.m_massInverse;
 
-	body0.m_momentum += cross(xaWorld, impulseNormal);
-	body1.m_momentum -= cross(xbWorld, impulseNormal);
+		body0.m_momentum += cross(xaWorld, impulseNormal);
+		body1.m_momentum -= cross(xbWorld, impulseNormal);
+	}
 
 	return true;
 }
