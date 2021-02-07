@@ -10,7 +10,7 @@ void FBCSystem::SceneSetup(int sceneflag)
 {
 	m_rigidBodies.clear();
 	m_springs.clear();
-	m_stiffness = 40.0f;
+	m_stiffness = 400.0f;
 	m_damping = 0.0f;
 
 	int number_masspoints = 5;
@@ -19,12 +19,12 @@ void FBCSystem::SceneSetup(int sceneflag)
 	for (int i = 0; i < number_masspoints; i++) {
 		for (int j = 0; j < number_masspoints; j++) {
 			m_rigidBodies.emplace_back(Vec3(0.0f - grid_element_size * number_masspoints / 3.0f + i * grid_element_size, 1.0f, 0.0f - grid_element_size * number_masspoints / 3.0f + j * grid_element_size),
-				Vec3(0.1f, 0.1f, 0.1f), 0.1f);
+				Vec3(0.1f, 0.1f, 0.1f), 1.0f);
 			m_rigidBodies.back().update(0.0f);
 		}
 	}
 
-	m_rigidBodies.emplace_back(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.6f, 0.5f), 2.0f);
+	m_rigidBodies.emplace_back(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.6f, 0.5f), 20.0f);
 	Quat rotation(Vec3(0.0f, 0.0f, 1.0f), (float)(M_PI) * 0.5f);
 	m_rigidBodies.back().setRotation(rotation);
 	//m_rigidBodies.back().setVelocity(XMVectorSet(-0.3f, -0.5f, -0.25f, 0.0f));
@@ -63,7 +63,7 @@ void FBCSystem::addGlobalFrameForce(const Vec3 force)
 	for (RigidBody& rigidBody : m_rigidBodies)
 	{
 		rigidBody.addForceWorld(force, XMVectorZero());
-		rigidBody.addForce(m_gravity, XMVectorZero());
+		rigidBody.addForce(m_gravity * 1.0f / rigidBody.m_massInverse, XMVectorZero());
 	}
 }
 
