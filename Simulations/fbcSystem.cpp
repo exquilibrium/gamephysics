@@ -12,20 +12,39 @@ void FBCSystem::SceneSetup(int sceneflag)
 	m_springs.clear();
 	m_stiffness = 40.0f;
 	m_damping = 0.0f;
-	if (sceneflag == 0)
-	{// basic test
-		m_rigidBodies.emplace_back(Vec3(0.0f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
-		m_rigidBodies.emplace_back(Vec3(0.0f, -0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
-		m_rigidBodies.emplace_back(Vec3(0.5f, 0.5f, 0.0f), Vec3(0.25f, 0.25f, 0.25f), 1.0f);
 
-		m_rigidBodies.emplace_back(Vec3(0.0f, -0.75f, 0.0f), Vec3(10000, 0.05f, 10000), 10000);
-		m_rigidBodies[3].update(0);
-		m_rigidBodies[3].fixed = true;
-		AddSpring(0,1);
+	int number_masspoints = 5;
+	float grid_element_size = 0.2;
 
-		m_rigidBodies[0].addForceWorld(Vec3(0,200,0), Vec3(0,0.5,0));
-		m_rigidBodies[1].addForceWorld(Vec3(0, -200, 0), Vec3(0, -0.5, 0));
-		m_rigidBodies[2].addForce(Vec3(-200,0, 0), Vec3(0, 0, 0));
+	for (int i = 0; i < number_masspoints; i++) {
+		for (int j = 0; j < number_masspoints; j++) {
+			m_rigidBodies.emplace_back(Vec3(0.0f - grid_element_size * number_masspoints / 3.0f + i * grid_element_size, 1.0f, 0.0f - grid_element_size * number_masspoints / 3.0f + j * grid_element_size),
+				Vec3(0.1f, 0.1f, 0.1f), 0.1f);
+			m_rigidBodies.back().update(0.0f);
+		}
+	}
+
+	m_rigidBodies.emplace_back(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.6f, 0.5f), 2.0f);
+	Quat rotation(Vec3(0.0f, 0.0f, 1.0f), (float)(M_PI) * 0.5f);
+	m_rigidBodies.back().setRotation(rotation);
+	//m_rigidBodies.back().setVelocity(XMVectorSet(-0.3f, -0.5f, -0.25f, 0.0f));
+	m_rigidBodies.back().update(0.0f);// set up obj to World and World to obj Matrix!
+
+	Vec3 force = Vec3(1.0f, 1.0f, 0.0f);
+	Vec3 fwhere = Vec3(0.3f, 0.5f, 0.25f);
+
+	m_rigidBodies.back().addForceWorld(force, fwhere);
+
+	m_rigidBodies.emplace_back(Vec3(0.0f, -0.75f, 0.0f), Vec3(10000, 0.05f, 10000), 10000);
+	m_rigidBodies.back().update(0.0f);
+	m_rigidBodies.back().fixed = true;
+
+	for (int i = 0; i < number_masspoints - 1; i++) {
+		for (int j = 0; j < number_masspoints - 1; j++) {
+			AddSpring(i + j * number_masspoints, i + j * number_masspoints + 1);
+			AddSpring(i + j * number_masspoints, i + j * number_masspoints + number_masspoints);
+			AddSpring(i + j * number_masspoints, i + j * number_masspoints + 1 + number_masspoints);
+		}
 	}
 }
 
