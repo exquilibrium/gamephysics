@@ -132,7 +132,7 @@ void FBCSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 			std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
 			DUC->setUpLighting(Vec3(),0.4*Vec3(1,1,1),100,0.6*Vec3(randCol(eng),randCol(eng), randCol(eng)));
 			//DUC->drawSphere(rigidBody.collisonPoint,Vec3(0.05f, 0.05f, 0.05f));
-			DUC->beginLine();
+			/*DUC->beginLine();
 			Vec3 velocity = rigidBody.totalVelocity;
 			DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DeepPink,rigidBody.collisonPoint.toDirectXVector()+rigidBody.relVelocity.toDirectXVector(),Colors::DeepPink);
 
@@ -145,7 +145,7 @@ void FBCSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 				DUC->drawLine(rigidBody.collisonPoint.toDirectXVector(),Colors::DarkCyan,rigidBody.collisonPoint.toDirectXVector()+rigidBody.collisioNormal.toDirectXVector(),Colors::DarkViolet);
 
 			}
-			DUC->endLine();
+			DUC->endLine();*/
 
 /*
 			std::vector<XMVECTOR> corners = rigidBody.getCorners();
